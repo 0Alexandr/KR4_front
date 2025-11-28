@@ -1,0 +1,28 @@
+.quick-actions {
+  margin: 25px 0;
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.quick-actions button {
+  padding: 12px 20px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1em;
+  transition: all 0.2s ease;
+}
+
+.quick-actions button:hover {
+  background: #1565c0;
+  transform: translateY(-2px);
+}
+
+.quick-actions button:active {
+  transform: translateY(0);
+}
