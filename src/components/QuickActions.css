@@ -1,28 +1,42 @@
-.quick-actions {
-  margin: 25px 0;
-  display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
-  justify-content: center;
+.quick-actions-container {
+  margin: 32px 0;
+  padding: 28px;
+  background: #f8f9fa;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  border: 1px solid #e9ecef;
 }
 
-.quick-actions button {
-  padding: 12px 20px;
-  background: #1976d2;
-  color: white;
+.quick-actions-container h3 {
+  margin: 0 0 22px 0;
+  color: #2c3e50;
+  font-size: 1.4em;
+}
+
+.quick-actions-buttons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.quick-actions-buttons button {
+  padding: 14px 24px;
   border: none;
-  border-radius: 8px;
-  cursor: pointer;
+  border-radius: 12px;
+  color: white;
   font-weight: 600;
   font-size: 1em;
-  transition: all 0.2s ease;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 
-.quick-actions button:hover {
-  background: #1565c0;
-  transform: translateY(-2px);
+.quick-actions-buttons button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
-.quick-actions button:active {
-  transform: translateY(0);
-}
+.btn-success { background: #4caf50; }
+.btn-warning { background: #c82e2e; }
+.btn-random { background: #ff9800; }
+.btn-export { background: #2196f3; }

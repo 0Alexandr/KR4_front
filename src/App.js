@@ -1,65 +1,31 @@
-import { useState, useEffect } from 'react';
-import './App.css';
-import TechnologyCard from './components/TechnologyCard';
-import ProgressHeader from './components/ProgressHeader';
+import React, { useState } from 'react';
+import useTechnologies from './hooks/useTechnologies';
+import ProgressBar from './components/ProgressBar';
 import QuickActions from './components/QuickActions';
+import TechnologyCard from './components/TechnologyCard';
 import FilterTabs from './components/FilterTabs';
 
-import './components/TechnologyCard.css';
-import './components/ProgressHeader.css';
-import './components/QuickActions.css';
-import './components/FilterTabs.css';
+import './App.css';                          // глобальные стили
+import './components/Header.css';            // фиолетовая шапка
+import './components/ProgressBar.css';       // прогресс-бар
+import './components/QuickActions.css';      // быстрые действия
+import './components/Modal.css';             // модалка
+import './components/TechnologyCard.css';    // ← САМОЕ ГЛАВНОЕ! Карточки
+import './components/FilterTabs.css';        // ← Кнопки фильтров (Все / Не начато и т.д.)
 
 function App() {
-  const [technologies, setTechnologies] = useState(() => {
-    // Сразу пытаемся загрузить из localStorage при инициализации состояния
-    const saved = localStorage.getItem('techTrackerData');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error('Ошибка парсинга localStorage', e);
-      }
-    }
-    // Если ничего нет — дефолтные данные
-    return [
-      { id: 1, title: 'React Components', description: 'Базовые компоненты', status: 'completed', notes: '' },
-      { id: 2, title: 'JSX Syntax', description: 'Синтаксис JSX', status: 'completed', notes: '' },
-      { id: 3, title: 'Props и состояние', description: 'Передача данных', status: 'in-progress', notes: '' },
-      { id: 4, title: 'useState & useEffect', description: 'Хуки', status: 'in-progress', notes: '' },
-      { id: 5, title: 'React Router', description: 'Навигация', status: 'not-started', notes: '' },
-      { id: 6, title: 'Redux / Zustand', description: 'Глобальное состояние', status: 'not-started', notes: '' },
-      { id: 7, title: 'TypeScript', description: 'Типизация', status: 'not-started', notes: '' },
-      { id: 8, title: 'Testing (Jest)', description: 'Тестирование', status: 'not-started', notes: '' }
-    ];
-  });
+  const {
+    technologies,
+    updateStatus,
+    updateNotes,
+    markAllCompleted,
+    resetAll,
+    randomNext,
+    progress
+  } = useTechnologies();
 
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Сохраняем при каждом изменении
-  useEffect(() => {
-    localStorage.setItem('techTrackerData', JSON.stringify(technologies));
-  }, [technologies]);
-
-  // Функции обновления
-  const updateStatus = (id, newStatus) => {
-    setTechnologies(prev => prev.map(t => t.id === id ? { ...t, status: newStatus } : t));
-  };
-
-  const updateTechnologyNotes = (id, newNotes) => {
-    setTechnologies(prev => prev.map(t => t.id === id ? { ...t, notes: newNotes } : t));
-  };
-
-  const markAllCompleted = () => setTechnologies(prev => prev.map(t => ({ ...t, status: 'completed' })));
-  const resetAll = () => setTechnologies(prev => prev.map(t => ({ ...t, status: 'not-started', notes: '' })));
-
-  const randomNext = () => {
-    const notStarted = technologies.filter(t => t.status === 'not-started');
-    if (!notStarted.length) return;
-    const randomTech = notStarted[Math.floor(Math.random() * notStarted.length)];
-    updateStatus(randomTech.id, 'in-progress');
-  };
 
   const filteredTechs = technologies.filter(tech => {
     if (filter !== 'all' && tech.status !== filter) return false;
@@ -68,23 +34,43 @@ function App() {
     return tech.title.toLowerCase().includes(q) || tech.description.toLowerCase().includes(q);
   });
 
+  const completedCount = technologies.filter(t => t.status === 'completed').length;
+
   return (
     <div className="App">
+      {/* Фиолетовая шапка */}
+      <div className="tech-header">
+        <h1>Дорожная карта изучения технологий</h1>
+        <div className="progress-wrapper">
+          <ProgressBar progress={progress} label="Общий прогресс изучения" color="#4caf50" />
+        </div>
+        <div className="stats">
+          Изучено: <strong>{completedCount}</strong> из <strong>{technologies.length}</strong>
+        </div>
+      </div>
+
       <div className="container">
-        <ProgressHeader technologies={technologies} />
         <FilterTabs currentFilter={filter} onFilterChange={setFilter} />
 
-        <div className="search-box">
+        <div style={{ margin: '20px 0', display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' }}>
           <input
             type="text"
             placeholder="Поиск по названию или описанию..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ padding: '12px 16px', border: '2px solid #ddd', borderRadius: '10px', fontSize: '1em', flex: '1', minWidth: '260px' }}
           />
-          <span>Найдено: {filteredTechs.length} из {technologies.length}</span>
+          <span style={{ color: '#555', fontWeight: '600' }}>
+            Найдено: {filteredTechs.length} из {technologies.length}
+          </span>
         </div>
 
-        <QuickActions onUpdateAll={markAllCompleted} onResetAll={resetAll} onRandomNext={randomNext} />
+        <QuickActions
+          onMarkAllCompleted={markAllCompleted}
+          onResetAll={resetAll}
+          onRandomNext={randomNext}
+          technologies={technologies}
+        />
 
         <div className="technologies-list">
           {filteredTechs.map(tech => (
@@ -92,7 +78,7 @@ function App() {
               key={tech.id}
               technology={tech}
               onStatusChange={updateStatus}
-              onNotesChange={updateTechnologyNotes}
+              onNotesChange={updateNotes}
             />
           ))}
         </div>

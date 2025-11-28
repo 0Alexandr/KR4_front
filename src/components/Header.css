@@ -1,0 +1,25 @@
+.tech-header {
+  background: #7d5d93;
+  color: white;
+  padding: 34px 24px;
+  border-radius: 16px;
+  margin-bottom: 34px;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(125, 93, 147, 0.3);
+}
+
+.tech-header h1 {
+  margin: 0 0 18px 0;
+  font-size: 2.4em;
+  font-weight: 700;
+}
+
+.tech-header .progress-wrapper {
+  margin: 20px 0;
+}
+
+.tech-header .stats {
+  font-size: 1.15em;
+  opacity: 0.95;
+  margin-top: 12px;
+}
