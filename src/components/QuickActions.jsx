@@ -2,35 +2,26 @@ import { useState } from 'react';
 import Modal from './Modal';
 import './QuickActions.css';
 
-function QuickActions({ onMarkAllCompleted, onResetAll, onRandomNext, technologies }) {
-  const [showExportModal, setShowExportModal] = useState(false);
-
-  const handleExport = () => {
-    const data = { exportedAt: new Date().toLocaleString('ru-RU'), technologies };
-    navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-    setShowExportModal(true);
-  };
+function QuickActions({ onMarkAllCompleted, onResetAll, onRandomNext }) {
+  const [showModal, setShowModal] = useState(false);
 
   return (
     <div className="quick-actions-container">
       <h3>Быстрые действия</h3>
       <div className="quick-actions-buttons">
-        <button onClick={onMarkAllCompleted} className="btn-success">
+        <button onClick={onMarkAllCompleted} className="btn-action btn-success">
           Отметить всё как выполненное
         </button>
-        <button onClick={onResetAll} className="btn-warning">
+        <button onClick={onResetAll} className="btn-action btn-warning">
           Сбросить всё
         </button>
-        <button onClick={onRandomNext} className="btn-random">
+        <button onClick={onRandomNext} className="btn-action btn-random">
           Случайная следующая
-        </button>
-        <button onClick={handleExport} className="btn-export">
-          Экспорт данных
         </button>
       </div>
 
-      <Modal isOpen={showExportModal} onClose={() => setShowExportModal(false)} title="Экспорт завершён">
-        <p>Данные скопированы в буфер обмена!</p>
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Действие выполнено">
+        <p>Операция завершена успешно.</p>
       </Modal>
     </div>
   );

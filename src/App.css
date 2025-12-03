@@ -1,3 +1,4 @@
+/* Существующие стили из вашего App.css */
 .App {
   min-height: 100vh;
   background: #f5f7fa;
@@ -59,4 +60,34 @@
 .search-box span {
   color: #555;
   font-weight: 600;
+}
+
+/* Новые стили для страниц */
+.page {
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.back-link {
+  color: #1976d2;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.btn {
+  padding: 10px 20px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
 }

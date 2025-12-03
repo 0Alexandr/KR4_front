@@ -1,3 +1,4 @@
+import './FilterTabs.css';
 function FilterTabs({ currentFilter, onFilterChange }) {
   const filters = [
     { key: 'all', label: 'Все' },

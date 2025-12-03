@@ -26,6 +26,26 @@ function useTechnologies() {
     ));
   };
 
+  const addTechnology = (newTech) => {
+    setTechnologies(prev => {
+      const maxId = prev.length === 0 ? 0 : Math.max(...prev.map(t => t.id));
+
+      const newTechnology = {
+      id: maxId + 1,
+      title: newTech.title,
+      description: newTech.description,
+      status: 'not-started',
+      notes: ''
+    };
+
+    return [...prev, newTechnology];
+    });
+  };
+
+  const deleteTechnology = (id) => {
+    setTechnologies(prev => prev.filter(t => t.id !== id));
+  };
+
   const markAllCompleted = () => {
     setTechnologies(prev => prev.map(t => ({ ...t, status: 'completed' })));
   };
@@ -41,6 +61,11 @@ function useTechnologies() {
     updateStatus(randomTech.id, 'in-progress');
   };
 
+  const exportData = () => {
+    const data = { exportedAt: new Date().toLocaleString('ru-RU'), technologies };
+    navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+  };
+
   const progress = technologies.length > 0
     ? Math.round(technologies.filter(t => t.status === 'completed').length / technologies.length * 100)
     : 0;
@@ -49,9 +74,12 @@ function useTechnologies() {
     technologies,
     updateStatus,
     updateNotes,
+    addTechnology,
+    deleteTechnology,
     markAllCompleted,
     resetAll,
     randomNext,
+    exportData,
     progress
   };
 }

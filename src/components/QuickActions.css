@@ -19,7 +19,8 @@
   flex-wrap: wrap;
 }
 
-.quick-actions-buttons button {
+/* Общий стиль для всех кнопок действий */
+.btn-action {
   padding: 14px 24px;
   border: none;
   border-radius: 12px;
@@ -31,12 +32,11 @@
   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 
-.quick-actions-buttons button:hover {
-  transform: translateY(-3px);
+.btn-action:hover {
+  transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
 .btn-success { background: #4caf50; }
 .btn-warning { background: #c82e2e; }
 .btn-random { background: #ff9800; }
-.btn-export { background: #2196f3; }

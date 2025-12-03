@@ -23,3 +23,14 @@
   opacity: 0.95;
   margin-top: 12px;
 }
+
+/* === Стили для навигации === */
+.nav-link {
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.nav-link:hover {
+  color: #80d8ff;   /* красивый голубой */
+}
