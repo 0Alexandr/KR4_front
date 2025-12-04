@@ -1,9 +1,6 @@
-import { useState } from 'react';
-import Modal from './Modal';
 import './QuickActions.css';
 
 function QuickActions({ onMarkAllCompleted, onResetAll, onRandomNext }) {
-  const [showModal, setShowModal] = useState(false);
 
   return (
     <div className="quick-actions-container">
@@ -19,10 +16,6 @@ function QuickActions({ onMarkAllCompleted, onResetAll, onRandomNext }) {
           Случайная следующая
         </button>
       </div>
-
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Действие выполнено">
-        <p>Операция завершена успешно.</p>
-      </Modal>
     </div>
   );
 }

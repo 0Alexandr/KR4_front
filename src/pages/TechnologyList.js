@@ -5,6 +5,7 @@ import TechnologyCard from '../components/TechnologyCard';
 import FilterTabs from '../components/FilterTabs';
 import QuickActions from '../components/QuickActions';
 import ProgressBar from '../components/ProgressBar';
+import Modal from '../components/Modal';
 
 function TechnologyList({ 
   technologies, 
@@ -23,6 +24,8 @@ function TechnologyList({
   const [filteredTechs, setFilteredTechs] = useState([]);
   const [loadingApi, setLoadingApi] = useState(false);
   const [apiError, setApiError] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
   const debounceRef = useRef(null);
 
   useEffect(() => {
@@ -31,7 +34,10 @@ function TechnologyList({
     debounceRef.current = setTimeout(() => {
       let result = technologies;
 
-      if (filter !== 'all') result = result.filter(t => t.status === filter);
+      if (filter !== 'all') {
+        result = result.filter(t => t.status === filter);
+      }
+
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         result = result.filter(t =>
@@ -44,76 +50,74 @@ function TechnologyList({
     }, 300);
   }, [technologies, filter, searchQuery]);
 
-  // САМЫЙ НАДЁЖНЫЙ СПОСОБ — 18 случайных рецептов
   const loadRecipesFromApi = async () => {
     setLoadingApi(true);
     setApiError('');
 
     try {
       const newRecipes = [];
-      const totalToLoad = 18;
 
-      for (let i = 0; i < totalToLoad; i++) {
+      for (let i = 0; i < 15; i++) {
         const res = await fetch('https://www.themealdb.com/api/json/v1/1/random.php');
         if (!res.ok) continue;
 
         const data = await res.json();
-        const recipe = data.meals[0];
+        const r = data.meals[0];
 
-        if (recipe) {
-          newRecipes.push({
-            id: `recipe-${recipe.idMeal}-${Date.now()}`,
-            title: recipe.strMeal,
-            description: (recipe.strInstructions || 'Delicious recipe!').substring(0, 280) + '...',
-            status: 'not-started',
-            notes: '',
-            category: recipe.strCategory,
-            area: recipe.strArea
-          });
-        }
+        newRecipes.push({
+          id: `recipe-${r.idMeal}-${Date.now()}-${i}`,
+          title: r.strMeal,
+          shortDescription: (r.strInstructions || '').substring(0, 180) + '...',
+          description: r.strInstructions || 'Инструкция отсутствует.',
+          image: r.strMealThumb,
+          category: r.strCategory,
+          area: r.strArea,
+          status: 'not-started',
+          notes: ''
+        });
 
-        // Небольшая задержка — чтобы не спамить, но быстро
-        await new Promise(r => setTimeout(r, 300));
+        await new Promise(resolve => setTimeout(resolve, 550));
       }
-
-      if (newRecipes.length === 0) throw new Error('Не удалось загрузить рецепты');
 
       const current = JSON.parse(localStorage.getItem('techTrackerData') || '[]');
-      const existingIds = new Set(current.map(t => t.id));
-      const uniqueNew = newRecipes.filter(r => !existingIds.has(r.id));
+      const existingTitles = new Set(current.map(t => t.title));
+      const uniqueNew = newRecipes.filter(r => !existingTitles.has(r.title));
 
       if (uniqueNew.length === 0) {
-        setApiError('Все рецепты уже загружены!');
+        setApiError('Все рецепты уже есть в списке!');
       } else {
-        current.push(...uniqueNew);
-        localStorage.setItem('techTrackerData', JSON.stringify(current));
-        alert(`Успешно добавлено ${uniqueNew.length} новых рецептов!`);
-        window.location.reload();
+        const updated = [...current, ...uniqueNew];
+        localStorage.setItem('techTrackerData', JSON.stringify(updated));
+        setModalMessage(`Добавлено ${uniqueNew.length} новых рецептов!`);
+        setModalOpen(true);
+        setTimeout(() => window.location.reload(), 1500);
       }
     } catch (err) {
-      setApiError('Ошибка: ' + err.message);
+      setApiError('Ошибка загрузки: ' + err.message);
     } finally {
       setLoadingApi(false);
     }
   };
 
-  const completedCount = technologies.filter(t => t.status === 'completed').length;
+  const handleResetAll = () => {
+    if (window.confirm('Сбросить весь прогресс?\nВсе статусы станут «Не начато», заметки очистятся.')) {
+      resetAll();
+      setModalMessage('Прогресс успешно сброшен!');
+      setModalOpen(true);
+    }
+  };
 
   return (
     <div className="page">
-      <h1>Трекер технологий и рецептов</h1>
+      <h1>Рецепты и технологии</h1>
 
-      <ProgressBar progress={progress} label="Прогресс изучения" color="#4caf50" />
+      <ProgressBar progress={progress} />
 
-      <div className="stats">
-        Готово: <strong>{completedCount}</strong> из <strong>{technologies.length}</strong>
-      </div>
-
-      {/* КНОПКА — ТЕПЕРЬ ВСЁ РАБОТАЕТ НА 100% */}
-      <div style={{ margin: '35px 0', textAlign: 'center' }}>
+      <div style={{ textAlign: 'center', margin: '40px 0' }}>
         <button
           onClick={loadRecipesFromApi}
           disabled={loadingApi}
+          className="btn-action"
           style={{
             padding: '18px 48px',
             fontSize: '1.3em',
@@ -123,48 +127,67 @@ function TechnologyList({
             border: 'none',
             borderRadius: '16px',
             cursor: loadingApi ? 'not-allowed' : 'pointer',
-            boxShadow: '0 8px 25px rgba(231, 76, 60, 0.5)',
-            transition: 'all 0.3s'
+            boxShadow: '0 8px 25px rgba(231,76,60,0.5)',
+            transition: 'all 0.3s ease'
           }}
+          onMouseEnter={e => !loadingApi && (e.target.style.transform = 'translateY(-6px)')}
+          onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
         >
-          {loadingApi ? 'Готовим рецепты...' : 'Загрузить 18 случайных рецептов'}
+          {loadingApi ? 'Готовим...' : 'Загрузить 15 случайных рецептов'}
         </button>
 
-        {apiError && <p style={{ marginTop: '15px', color: '#e74c3c', fontWeight: 'bold', fontSize: '1.1em' }}>{apiError}</p>}
+        {apiError && (
+          <p style={{ color: '#e74c3c', marginTop: 15, fontWeight: 'bold' }}>
+            {apiError}
+          </p>
+        )}
       </div>
 
       <FilterTabs currentFilter={filter} onFilterChange={setFilter} />
 
-      <div style={{ margin: '20px 0', display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' }}>
+      <div style={{ margin: '20px 0', display: 'flex', gap: 15, alignItems: 'center', flexWrap: 'wrap' }}>
         <input
           type="text"
           placeholder="Поиск по названию или описанию..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ padding: '14px 18px', border: '2px solid #ddd', borderRadius: '12px', fontSize: '1em', flex: '1', minWidth: '280px' }}
+          onChange={e => setSearchQuery(e.target.value)}
+          style={{
+            padding: '14px 18px',
+            border: '2px solid #ddd',
+            borderRadius: 12,
+            fontSize: '1em',
+            flex: 1,
+            minWidth: 280
+          }}
         />
-        <span style={{ fontWeight: '600' }}>Найдено: {filteredTechs.length}</span>
+        <span style={{ fontWeight: 600 }}>
+          Найдено: {filteredTechs.length}
+        </span>
       </div>
 
       <QuickActions
         onMarkAllCompleted={markAllCompleted}
-        onResetAll={resetAll}
+        onResetAll={handleResetAll}
         onRandomNext={randomNext}
-        technologies={technologies}
       />
 
       <div className="technologies-list">
-        {filteredTechs.map(tech => (
+        {filteredTechs.map(item => (
           <TechnologyCard
-            key={tech.id}
-            technology={tech}
+            key={item.id}
+            technology={item}
+            displayDescription={item.shortDescription || item.description}
             onStatusChange={updateStatus}
             onNotesChange={updateNotes}
-            onTitleClick={() => navigate(`/technologies/${tech.id}`)}
+            onTitleClick={() => navigate(`/technologies/${item.id}`)}
             onDelete={deleteTechnology}
           />
         ))}
       </div>
+
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Готово">
+        <p>{modalMessage}</p>
+      </Modal>
     </div>
   );
 }

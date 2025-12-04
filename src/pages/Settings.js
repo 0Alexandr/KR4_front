@@ -1,16 +1,17 @@
 import { useState, useRef } from 'react';
 import Modal from '../components/Modal';
 
-function Settings({ resetAll, importTestData }) {
+function Settings({ resetAll, importTestData, technologies, setTechnologies }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const fileInputRef = useRef(null);
 
-  // === СБРОС ПРОГРЕССА ===
-  const handleReset = () => {
-    if (window.confirm('Вы уверены, что хотите сбросить весь прогресс?\nВсе статусы станут «Не начато», заметки очистятся.')) {
-      resetAll();
-      setModalMessage('Весь прогресс успешно сброшен!');
+  // === УДАЛЕНИЕ ВСЕХ КАРТОЧЕК ===
+  const handleDeleteAll = () => {
+    if (window.confirm('Вы уверены, что хотите удалить все карточки?\nЭто действие нельзя отменить!')) {
+      setTechnologies([]);
+      localStorage.removeItem('techTrackerData');
+      setModalMessage('Все карточки успешно удалены!');
       setModalOpen(true);
     }
   };
@@ -54,11 +55,11 @@ function Settings({ resetAll, importTestData }) {
     a.click();
     URL.revokeObjectURL(url);
 
-    setModalMessage('Данные успешно экспортированы и скачаны!');
+    setModalMessage('Данные успешно экспортированы!');
     setModalOpen(true);
   };
 
-  // === ИМПОРТ ===
+  // === ИМПОРТ ИЗ JSON ===
   const handleImport = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -67,44 +68,38 @@ function Settings({ resetAll, importTestData }) {
     reader.onload = (event) => {
       try {
         const data = JSON.parse(event.target.result);
+        const importedTechs = data.technologies || [];
+        
+        // Проверяем структуру
+        if (!Array.isArray(importedTechs)) throw new Error('Неверный формат данных');
 
-        if (!data.technologies || !Array.isArray(data.technologies)) {
-          alert('Ошибка: файл не содержит массив технологий.');
-          return;
-        }
-
-        const count = data.technologies.length;
-
-        if (window.confirm(`Загрузить ${count} технологий из файла?\n\nТекущие данные будут полностью заменены!`)) {
-          // Сохраняем новые данные напрямую в localStorage
-          localStorage.setItem('techTrackerData', JSON.stringify(data.technologies));
-
-          setModalMessage(`Успешно загружено ${count} технологий! Страница сейчас перезагрузится.`);
-          setModalOpen(true);
-
-          // Перезагружаем, чтобы useTechnologies подхватил новые данные
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
-        }
+        // Заменяем текущие данные
+        localStorage.setItem('techTrackerData', JSON.stringify(importedTechs));
+        setModalMessage('Данные успешно импортированы! Страница сейчас перезагрузится.');
+        setModalOpen(true);
+        
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       } catch (err) {
-        console.error(err);
-        alert('Ошибка чтения файла. Убедитесь, что это валидный JSON от экспорта этого приложения.');
+        setModalMessage('Ошибка импорта: ' + err.message);
+        setModalOpen(true);
       }
     };
-
     reader.readAsText(file);
-    e.target.value = ''; // сбрасываем input
+
+    // Сбрасываем input
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   return (
     <div className="page">
-      <h1>Настройки и резервные копии</h1>
+      <h1>Настройки</h1>
 
       {/* === ТЕСТОВЫЕ ДАННЫЕ === */}
-      <div style={{ margin: '30px 0' }}>
+      <div style={{ marginBottom: '30px' }}>
         <h3>Тестовые данные</h3>
-        
+
         <button
           onClick={handleImportTestData}
           className="btn-action"
@@ -146,11 +141,11 @@ function Settings({ resetAll, importTestData }) {
         <h3>Управление данными</h3>
 
         <button
-          onClick={handleReset}
+          onClick={handleDeleteAll}
           className="btn-action"
           style={{ background: '#e74c3c' }}
         >
-          Сбросить весь прогресс
+          Удалить все карточки
         </button>
       </div>
 

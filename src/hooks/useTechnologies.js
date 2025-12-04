@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import useLocalStorage from './useLocalStorage';
 
 const defaultTechnologies = [
@@ -65,17 +66,13 @@ function useTechnologies() {
     updateStatus(randomTech.id, 'in-progress');
   };
 
-  const exportData = () => {
-    const data = { exportedAt: new Date().toLocaleString('ru-RU'), technologies };
-    navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-  };
-
   const progress = technologies.length > 0
     ? Math.round(technologies.filter(t => t.status === 'completed').length / technologies.length * 100)
     : 0;
 
   return {
     technologies,
+    setTechnologies,
     updateStatus,
     updateNotes,
     addTechnology,
@@ -84,7 +81,6 @@ function useTechnologies() {
     resetAll,
     importTestData,
     randomNext,
-    exportData,
     progress
   };
 }

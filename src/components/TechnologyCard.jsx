@@ -1,8 +1,10 @@
+// src/components/TechnologyCard.jsx
 import { useState } from 'react';
 import './TechnologyCard.css';
 
 function TechnologyCard({
   technology,
+  displayDescription, // ← новое пропс
   onStatusChange,
   onNotesChange,
   onTitleClick,
@@ -12,9 +14,9 @@ function TechnologyCard({
   const [localNotes, setLocalNotes] = useState(notes);
 
   const statusConfig = {
-    'not-started': { text: 'Не начато', icon: '❌', color: '#ff6b6b' },
-    'in-progress': { text: 'В процессе', icon: '⏳', color: '#f7b731' },
-    'completed': { text: 'Изучено', icon: '✅', color: '#26de81' }
+    'not-started': { text: 'Не начато', icon: 'Pending', color: '#ff6b6b' },
+    'in-progress': { text: 'В процессе', icon: 'In progress', color: '#f7b731' },
+    'completed': { text: 'Готово', icon: 'Completed', color: '#26de81' }
   };
 
   const current = statusConfig[status];
@@ -33,24 +35,24 @@ function TechnologyCard({
 
   const handleDeleteClick = (e) => {
     e.stopPropagation();
-    if (window.confirm(`Удалить технологию "${title}"?\n\nЭто действие нельзя отменить!`)) {
+    if (window.confirm(`Удалить "${title}"?`)) {
       onDelete(id);
     }
   };
+
+  // Используем переданное отображение описания, если есть
+  const descToShow = displayDescription || description;
 
   return (
     <div
       className={`technology-card status-${status}`}
       onClick={(e) => {
-        if (e.target.tagName !== 'TEXTAREA' &&
-            e.target.tagName !== 'BUTTON' &&
-            e.target.tagName !== 'H3') {
+        if (e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'BUTTON') {
           nextStatus();
         }
       }}
       style={{ cursor: 'pointer' }}
     >
-      {/* Верхняя строка: статус + кнопка удалить */}
       <div className="technology-top-row">
         <span className="status-badge" style={{ color: current.color }}>
           {current.icon} {current.text}
@@ -60,12 +62,11 @@ function TechnologyCard({
         </button>
       </div>
 
-      {/* Название технологии */}
       <h3 onClick={onTitleClick} className="technology-title">
         {title} →
       </h3>
 
-      <p className="technology-description">{description}</p>
+      <p className="technology-description">{descToShow}</p>
 
       <small style={{ color: '#777', display: 'block', margin: '10px 0' }}>
         Клик по карточке — сменить статус · Клик по названию — детали
@@ -77,13 +78,11 @@ function TechnologyCard({
           value={localNotes}
           onChange={handleNotesChange}
           onClick={(e) => e.stopPropagation()}
-          placeholder="Записывайте сюда важные моменты, ссылки, мысли..."
+          placeholder="Записывайте сюда важные моменты..."
           rows="4"
         />
         <div className="notes-hint">
-          {localNotes.length > 0
-            ? `Заметка сохранена (${localNotes.length} симв.)`
-            : 'Заметок пока нет'}
+          {localNotes ? `Заметка сохранена (${localNotes.length} симв.)` : 'Заметок пока нет'}
         </div>
       </div>
     </div>
