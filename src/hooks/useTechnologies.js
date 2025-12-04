@@ -54,6 +54,10 @@ function useTechnologies() {
     setTechnologies(prev => prev.map(t => ({ ...t, status: 'not-started', notes: '' })));
   };
 
+  const importTestData = () => {
+    setTechnologies(defaultTechnologies);
+  };
+
   const randomNext = () => {
     const notStarted = technologies.filter(t => t.status === 'not-started');
     if (notStarted.length === 0) return;
@@ -78,6 +82,7 @@ function useTechnologies() {
     deleteTechnology,
     markAllCompleted,
     resetAll,
+    importTestData,
     randomNext,
     exportData,
     progress

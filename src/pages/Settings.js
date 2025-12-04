@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import Modal from '../components/Modal';
 
-function Settings({ resetAll }) {
+function Settings({ resetAll, importTestData }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const fileInputRef = useRef(null);
@@ -12,6 +12,20 @@ function Settings({ resetAll }) {
       resetAll();
       setModalMessage('Весь прогресс успешно сброшен!');
       setModalOpen(true);
+    }
+  };
+
+  // === ИМПОРТ ТЕСТОВЫХ ДАННЫХ ===
+  const handleImportTestData = () => {
+    if (window.confirm('Загрузить тестовые данные?\n\nТекущие данные будут полностью заменены на 8 примеров технологий.\nЭто действие нельзя отменить!')) {
+      importTestData();
+      setModalMessage('Тестовые данные успешно загружены! Страница сейчас перезагрузится.');
+      setModalOpen(true);
+      
+      // Перезагружаем, чтобы применились изменения
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     }
   };
 
@@ -87,6 +101,19 @@ function Settings({ resetAll }) {
     <div className="page">
       <h1>Настройки и резервные копии</h1>
 
+      {/* === ТЕСТОВЫЕ ДАННЫЕ === */}
+      <div style={{ margin: '30px 0' }}>
+        <h3>Тестовые данные</h3>
+        
+        <button
+          onClick={handleImportTestData}
+          className="btn-action"
+          style={{ background: '#9b59b6', margin: '0 15px 15px 0' }}
+        >
+          Импорт тестовых данных
+        </button>
+      </div>
+
       {/* === РЕЗЕРВНОЕ КОПИРОВАНИЕ === */}
       <div style={{ margin: '30px 0' }}>
         <h3>Резервное копирование</h3>
@@ -133,8 +160,9 @@ function Settings({ resetAll }) {
       </Modal>
 
       <p style={{ marginTop: '40px', color: '#7f8c8d', fontSize: '0.9em', lineHeight: '1.6' }}>
-        • Экспорт сохраняет все технологии, статусы, заметки и ID<br />
-        • Импорт полностью заменяет текущие данные<br />
+        • <strong>Тестовые данные</strong> — восстанавливает 8 исходных технологий<br />
+        • <strong>Экспорт</strong> сохраняет все технологии, статусы, заметки и ID<br />
+        • <strong>Импорт</strong> полностью заменяет текущие данные<br />
         • После импорта страница автоматически обновится
       </p>
     </div>
