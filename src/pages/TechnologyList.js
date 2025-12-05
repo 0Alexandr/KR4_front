@@ -1,21 +1,20 @@
-// src/pages/TechnologyList.js
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import TechnologyCard from '../components/TechnologyCard';
 import FilterTabs from '../components/FilterTabs';
 import QuickActions from '../components/QuickActions';
 import ProgressBar from '../components/ProgressBar';
 import Modal from '../components/Modal';
 
-function TechnologyList({ 
-  technologies, 
-  updateStatus, 
-  updateNotes, 
-  markAllCompleted, 
-  resetAll, 
-  randomNext, 
-  progress, 
-  deleteTechnology 
+function TechnologyList({
+  technologies,
+  updateStatus,
+  updateNotes,
+  markAllCompleted,
+  resetAll,
+  randomNext,
+  progress,
+  deleteTechnology
 }) {
   const navigate = useNavigate();
 
@@ -141,6 +140,23 @@ function TechnologyList({
             {apiError}
           </p>
         )}
+      </div>
+
+      <div style={{ margin: '30px 0', textAlign: 'center' }}>
+        <Link
+          to="/add-technology"
+          className="btn-action"
+          style={{
+            padding: '14px 28px',
+            background: '#1976d2',
+            color: 'white',
+            textDecoration: 'none',
+            borderRadius: '12px',
+            fontWeight: '600',
+            display: 'inline-block'
+          }}>
+          + Добавить технологию
+        </Link>
       </div>
 
       <FilterTabs currentFilter={filter} onFilterChange={setFilter} />
