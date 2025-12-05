@@ -13,6 +13,7 @@ function Home() {
           <li>Быстрая работа без перезагрузки</li>
           <li><Link to="/technologies">Список технологий</Link></li>
           <li><Link to="/statistics">Статистика прогресса</Link></li>
+          <li><Link to="/settings">Настройки</Link></li>
         </ul>
       </div>
     </div>

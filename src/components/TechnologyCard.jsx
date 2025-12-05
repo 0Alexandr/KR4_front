@@ -1,10 +1,9 @@
-// src/components/TechnologyCard.jsx
 import { useState } from 'react';
 import './TechnologyCard.css';
 
 function TechnologyCard({
   technology,
-  displayDescription, // ← новое пропс
+  displayDescription,
   onStatusChange,
   onNotesChange,
   onTitleClick,
@@ -14,9 +13,9 @@ function TechnologyCard({
   const [localNotes, setLocalNotes] = useState(notes);
 
   const statusConfig = {
-    'not-started': { text: 'Не начато', icon: 'Pending', color: '#ff6b6b' },
-    'in-progress': { text: 'В процессе', icon: 'In progress', color: '#f7b731' },
-    'completed': { text: 'Готово', icon: 'Completed', color: '#26de81' }
+    'not-started': { text: 'Не начато', icon: '❌', color: '#ff6b6b' },
+    'in-progress': { text: 'В процессе', icon: '⏳', color: '#f7b731' },
+    'completed': { text: 'Готово', icon: '✅', color: '#26de81' }
   };
 
   const current = statusConfig[status];

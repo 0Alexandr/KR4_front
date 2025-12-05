@@ -1,8 +1,7 @@
-// src/pages/TechnologyDetail.js
 import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
-function ItemDetail({ technologies, updateStatus }) {
+function TechnologyDetail({ technologies, updateStatus }) {
   const { techId } = useParams();
   const [item, setItem] = useState(null);
 
@@ -113,4 +112,4 @@ function ItemDetail({ technologies, updateStatus }) {
   );
 }
 
-export default ItemDetail;
+export default TechnologyDetail;
