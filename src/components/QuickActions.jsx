@@ -1,22 +1,39 @@
-import './QuickActions.css';
+// src/components/QuickActions.jsx
+import { Box, Button, Stack } from '@mui/material';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import ShuffleIcon from '@mui/icons-material/Shuffle';
 
 function QuickActions({ onMarkAllCompleted, onResetAll, onRandomNext }) {
-
   return (
-    <div className="quick-actions-container">
-      <h3>Быстрые действия</h3>
-      <div className="quick-actions-buttons">
-        <button onClick={onMarkAllCompleted} className="btn-action btn-success">
+    <Box sx={{ my: 4, p: 3, bgcolor: 'background.paper', borderRadius: 3, boxShadow: 2 }}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
+        <Button
+          variant="contained"
+          color="success"
+          startIcon={<DoneAllIcon />}
+          onClick={onMarkAllCompleted}
+        >
           Отметить всё как выполненное
-        </button>
-        <button onClick={onResetAll} className="btn-action btn-warning">
+        </Button>
+        <Button
+          variant="contained"
+          color="warning"
+          startIcon={<RefreshIcon />}
+          onClick={onResetAll}
+        >
           Сбросить всё
-        </button>
-        <button onClick={onRandomNext} className="btn-action btn-random">
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          startIcon={<ShuffleIcon />}
+          onClick={onRandomNext}
+        >
           Случайная следующая
-        </button>
-      </div>
-    </div>
+        </Button>
+      </Stack>
+    </Box>
   );
 }
 

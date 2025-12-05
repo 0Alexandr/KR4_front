@@ -1,24 +1,26 @@
-import './FilterTabs.css';
+// src/components/FilterTabs.jsx
+import { ToggleButton, ToggleButtonGroup } from '@mui/material';
+
 function FilterTabs({ currentFilter, onFilterChange }) {
-  const filters = [
-    { key: 'all', label: 'Все' },
-    { key: 'not-started', label: 'Не начато' },
-    { key: 'in-progress', label: 'В процессе' },
-    { key: 'completed', label: 'Изучено' }
-  ];
+  const handleChange = (event, newFilter) => {
+    if (newFilter !== null) {
+      onFilterChange(newFilter);
+    }
+  };
 
   return (
-    <div className="filter-tabs">
-      {filters.map(f => (
-        <button
-          key={f.key}
-          className={currentFilter === f.key ? 'active' : ''}
-          onClick={() => onFilterChange(f.key)}
-        >
-          {f.label}
-        </button>
-      ))}
-    </div>
+    <ToggleButtonGroup
+      value={currentFilter}
+      exclusive
+      onChange={handleChange}
+      aria-label="фильтр по статусу"
+      sx={{ mt: 3, mb: 2, flexWrap: 'wrap', gap: 1 }}
+    >
+      <ToggleButton value="all">Все</ToggleButton>
+      <ToggleButton value="not-started">Не начато</ToggleButton>
+      <ToggleButton value="in-progress">В процессе</ToggleButton>
+      <ToggleButton value="completed">Изучено</ToggleButton>
+    </ToggleButtonGroup>
   );
 }
 

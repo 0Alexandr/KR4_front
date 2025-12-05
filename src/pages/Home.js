@@ -1,22 +1,27 @@
+import { Box, Typography, Button, Paper } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 function Home() {
   return (
-    <div className="page">
-      <h1>Добро пожаловать на главную страницу!</h1>
-      <p>Это стартовая страница нашего приложения.</p>
-      <div className="features">
-        <h2>Наши возможности:</h2>
-        <ul>
-          <li>Навигация между страницами</li>
-          <li>Динамическая загрузка контента</li>
-          <li>Быстрая работа без перезагрузки</li>
-          <li><Link to="/technologies">Список технологий</Link></li>
-          <li><Link to="/statistics">Статистика прогресса</Link></li>
-          <li><Link to="/settings">Настройки</Link></li>
-        </ul>
-      </div>
-    </div>
+    <Box sx={{ p: 3, textAlign: 'center' }}>
+      <Paper sx={{ p: 6, borderRadius: 4, boxShadow: 6 }}>
+        <Typography variant="h3" gutterBottom fontWeight="bold">
+          Добро пожаловать!
+        </Typography>
+        <Typography variant="h6" color="text.secondary" paragraph>
+          Ваш личный трекер изучения технологий
+        </Typography>
+
+        <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Button variant="contained" size="large" component={Link} to="/technologies">
+            Перейти к технологиям
+          </Button>
+          <Button variant="outlined" size="large" component={Link} to="/statistics">
+            Статистика
+          </Button>
+        </Box>
+      </Paper>
+    </Box>
   );
 }
 

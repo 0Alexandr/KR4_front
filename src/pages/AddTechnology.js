@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Box, Button, TextField, Typography } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 function AddTechnology({ addTechnology }) {
   const [title, setTitle] = useState('');
@@ -8,96 +10,46 @@ function AddTechnology({ addTechnology }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (!title.trim() || !description.trim()) {
       alert('Заполните название и описание!');
       return;
     }
-
-    addTechnology({
-      title: title.trim(),
-      description: description.trim(),
-    });
-
-    // Очищаем форму и возвращаемся в список
+    addTechnology({ title: title.trim(), description: description.trim() });
     setTitle('');
     setDescription('');
     navigate('/technologies');
   };
 
   return (
-    <div className="page">
-      <div style={{ marginBottom: '20px' }}>
-        <button
-          onClick={() => navigate('/technologies')}
-          className="back-link"
-          style={{ background: 'none', border: 'none', color: '#1976d2', cursor: 'pointer', fontSize: '1em' }}
-        >
-          ← Назад к списку
-        </button>
-      </div>
-
-      <h1>Добавить новую технологию</h1>
-
-      <form onSubmit={handleSubmit} style={{ maxWidth: '600px', margin: '0 auto' }}>
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
-            Название технологии
-          </label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Например: GraphQL"
-            style={{
-              width: '100%',
-              padding: '12px 16px',
-              fontSize: '1em',
-              border: '2px solid #ddd',
-              borderRadius: '10px',
-            }}
-            required
-          />
-        </div>
-
-        <div style={{ marginBottom: '30px' }}>
-          <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
-            Описание
-          </label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Краткое описание, зачем изучать..."
-            rows="5"
-            style={{
-              width: '100%',
-              padding: '12px 16px',
-              fontSize: '1em',
-              border: '2px solid #ddd',
-              borderRadius: '10px',
-              resize: 'vertical',
-            }}
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          style={{
-            padding: '14px 32px',
-            background: '#4caf50',
-            color: 'white',
-            border: 'none',
-            borderRadius: '10px',
-            fontSize: '1.1em',
-            fontWeight: '600',
-            cursor: 'pointer',
-          }}
-        >
+    <Box sx={{ p: 3, bgcolor: 'background.paper', borderRadius: 2, boxShadow: 3 }}>
+      <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/technologies')} sx={{ mb: 2 }}>
+        Назад к списку
+      </Button>
+      <Typography variant="h4" gutterBottom>Добавить новую технологию</Typography>
+      <form onSubmit={handleSubmit}>
+        <TextField
+          label="Название технологии"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <TextField
+          label="Описание"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          fullWidth
+          multiline
+          rows={5}
+          margin="normal"
+          required
+        />
+        <Button type="submit" variant="contained" color="secondary" sx={{ mt: 2 }}>
           Добавить технологию
-        </button>
+        </Button>
       </form>
-    </div>
+    </Box>
   );
 }
 

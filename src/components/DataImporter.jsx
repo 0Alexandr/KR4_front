@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Box, Typography, Button, Paper } from '@mui/material'; // ДОБАВИЛ Paper
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 
 function DataImporter({ onSuccess }) {
   const [isDragging, setIsDragging] = useState(false);
@@ -9,30 +11,20 @@ function DataImporter({ onSuccess }) {
     if (!Array.isArray(data) && !data.technologies) {
       throw new Error('Неверный формат: ожидается массив или объект с полем "technologies"');
     }
-
     const items = Array.isArray(data) ? data : data.technologies;
-
     for (const item of items) {
-      if (!item.title || typeof item.title !== 'string') {
-        throw new Error('Каждый элемент должен иметь поле "title" (строка)');
-      }
-      if (item.title.trim().length === 0) {
-        throw new Error('Название технологии не может быть пустым');
-      }
-      if (item.title.length > 100) {
-        throw new Error('Название слишком длинное (макс. 100 символов)');
+      if (!item.title || typeof item.title !== 'string' || item.title.trim().length === 0) {
+        throw new Error('Каждый элемент должен иметь валидное поле "title"');
       }
     }
-
     return items;
   };
 
   const processFile = (file) => {
     if (!file.name.toLowerCase().endsWith('.json')) {
-      setImportError('Поддерживаются только файлы .json');
+      setImportError('Только .json файлы!');
       return;
     }
-
     setIsLoading(true);
     setImportError('');
 
@@ -41,11 +33,8 @@ function DataImporter({ onSuccess }) {
       try {
         const content = JSON.parse(e.target.result);
         const validData = validateAndImport(content);
-
         localStorage.setItem('techTrackerData', JSON.stringify(validData));
         onSuccess?.();
-        alert(`Успешно импортировано ${validData.length} элементов! Страница перезагрузится...`);
-        setTimeout(() => window.location.reload(), 1500);
       } catch (err) {
         setImportError(err.message);
       } finally {
@@ -55,90 +44,69 @@ function DataImporter({ onSuccess }) {
     reader.readAsText(file);
   };
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) processFile(file);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => setIsDragging(false);
-
   return (
-    <div style={{ margin: '30px 0' }}>
-      <h3>Импорт данных</h3>
-      <p style={{ color: '#555', fontSize: '0.95em' }}>
-        Загрузите ранее сохранённый JSON-файл
-      </p>
+    <Box sx={{ mt: 4 }}>
+      <Typography variant="h6" gutterBottom>
+        Импорт данных
+      </Typography>
 
-      <div
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        style={{
-          border: isDragging ? '3px dashed #3498db' : '2px dashed #bdc3c7',
-          borderRadius: '16px',
-          padding: '40px',
-          textAlign: 'center',
-          background: isDragging ? '#ebf3fd' : '#f8f9fa',
-          transition: 'all 0.3s ease',
-          cursor: 'pointer'
+      <Box
+        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+        onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+        onDrop={(e) => {
+          e.preventDefault();
+          setIsDragging(false);
+          if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
         }}
-        role="region"
-        aria-label="Зона для перетаскивания JSON-файла"
+        sx={{
+          border: '3px dashed',
+          borderColor: isDragging ? 'primary.main' : 'grey.600',
+          bgcolor: isDragging ? 'grey.800' : 'grey.850',
+          color: 'grey.300',
+          borderRadius: 3,
+          p: 6,
+          textAlign: 'center',
+          transition: 'all 0.3s ease',
+          cursor: 'pointer',
+          '&:hover': {
+            bgcolor: 'grey.800',
+            borderColor: 'primary.main'
+          }
+        }}
       >
-        <p style={{ fontSize: '1.2em', margin: '#2c3e50' }}>
+        <UploadFileIcon sx={{ fontSize: 60, color: 'grey.500', mb: 2 }} />
+        <Typography variant="h6" gutterBottom>
           Перетащите JSON-файл сюда
-        </p>
-        <p style={{ color: '#7f8c8d' }}>или</p>
+        </Typography>
+        <Typography variant="body2" color="grey.400">
+          или
+        </Typography>
 
-        <label
-          style={{
-            display: 'inline-block',
-            padding: '14px 32px',
-            background: '#3498db',
-            color: 'white',
-            borderRadius: '12px',
-            cursor: 'pointer',
-            fontWeight: '600',
-            boxShadow: '0 4px 15px rgba(52, 152, 219, 0.4)',
-            transition: 'all 0.3s'
-          }}
-          onMouseEnter={e => e.target.style.transform = 'translateY(-4px)'}
-          onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
-        >
-          {isLoading ? 'Загрузка...' : 'Выбрать файл'}
+        <label>
+          <Button
+            variant="contained"
+            component="span"
+            startIcon={<UploadFileIcon />}
+            sx={{ mt: 2 }}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Загрузка...' : 'Выбрать файл'}
+          </Button>
           <input
             type="file"
-            accept=".json,application/json"
+            accept=".json"
+            hidden
             onChange={(e) => e.target.files[0] && processFile(e.target.files[0])}
-            style={{ display: 'none' }}
           />
         </label>
-      </div>
+      </Box>
 
       {importError && (
-        <div
-          role="alert"
-          style={{
-            marginTop: '16px',
-            padding: '14px',
-            background: '#fdf2f2',
-            border: '1px solid #e74c3c',
-            borderRadius: '10px',
-            color: '#c0392b',
-            fontWeight: 'bold'
-          }}
-        >
-          {importError}
-        </div>
+        <Paper sx={{ mt: 2, p: 2, bgcolor: 'error.dark', color: 'error.contrastText' }}>
+          <Typography>{importError}</Typography>
+        </Paper>
       )}
-    </div>
+    </Box>
   );
 }
 

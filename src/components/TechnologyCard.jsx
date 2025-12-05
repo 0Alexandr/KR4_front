@@ -1,90 +1,63 @@
-import { useState } from 'react';
-import './TechnologyCard.css';
+import { Card, CardContent, CardActions, Typography, Chip, IconButton, TextField, Box } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 
-function TechnologyCard({
-  technology,
-  displayDescription,
-  onStatusChange,
-  onNotesChange,
-  onTitleClick,
-  onDelete
-}) {
-  const { id, title, description, status, notes = '' } = technology;
-  const [localNotes, setLocalNotes] = useState(notes);
-
-  const statusConfig = {
-    'not-started': { text: 'Не начато', icon: '❌', color: '#ff6b6b' },
-    'in-progress': { text: 'В процессе', icon: '⏳', color: '#f7b731' },
-    'completed': { text: 'Готово', icon: '✅', color: '#26de81' }
+function TechnologyCard({ technology, onStatusChange, onNotesChange, onTitleClick, onDelete }) {
+  const statusIcons = {
+    'completed': <CheckCircleIcon color="success" />,
+    'in-progress': <AccessTimeIcon color="warning" />,
+    'not-started': <RadioButtonUncheckedIcon color="action" />
   };
-
-  const current = statusConfig[status];
-
-  const nextStatus = () => {
-    const order = ['not-started', 'in-progress', 'completed'];
-    const nextIndex = (order.indexOf(status) + 1) % 3;
-    onStatusChange(id, order[nextIndex]);
-  };
-
-  const handleNotesChange = (e) => {
-    const value = e.target.value;
-    setLocalNotes(value);
-    onNotesChange(id, value);
-  };
-
-  const handleDeleteClick = (e) => {
-    e.stopPropagation();
-    if (window.confirm(`Удалить "${title}"?`)) {
-      onDelete(id);
-    }
-  };
-
-  // Используем переданное отображение описания, если есть
-  const descToShow = displayDescription || description;
 
   return (
-    <div
-      className={`technology-card status-${status}`}
-      onClick={(e) => {
-        if (e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'BUTTON') {
-          nextStatus();
-        }
+    <Card
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: '0.3s',
+        '&:hover': { transform: 'translateY(-8px)', boxShadow: 10 }
       }}
-      style={{ cursor: 'pointer' }}
     >
-      <div className="technology-top-row">
-        <span className="status-badge" style={{ color: current.color }}>
-          {current.icon} {current.text}
-        </span>
-        <button onClick={handleDeleteClick} className="delete-btn">
-          Удалить
-        </button>
-      </div>
+      <CardContent sx={{ flexGrow: 1 }}>
+        <Box display="flex" justifyContent="space-between" alignItems="flex-start">
+          <Box>
+            <Typography variant="h6" onClick={onTitleClick} sx={{ cursor: 'pointer', '&:hover': { color: 'primary.main' } }}>
+              {technology.title} <ArrowForwardIcon fontSize="small" />
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              {technology.description}
+            </Typography>
+          </Box>
+          {statusIcons[technology.status]}
+        </Box>
 
-      <h3 onClick={onTitleClick} className="technology-title">
-        {title} →
-      </h3>
+        <Box sx={{ mt: 3 }}>
+          <TextField
+            fullWidth
+            multiline
+            rows={3}
+            label="Заметки"
+            value={technology.notes || ''}
+            onChange={(e) => onNotesChange(technology.id, e.target.value)}
+            variant="outlined"
+            size="small"
+          />
+        </Box>
+      </CardContent>
 
-      <p className="technology-description">{descToShow}</p>
-
-      <small style={{ color: '#777', display: 'block', margin: '10px 0' }}>
-        Клик по карточке — сменить статус · Клик по названию — детали
-      </small>
-
-      <div className="notes-section">
-        <h4>Мои заметки:</h4>
-        <textarea
-          value={localNotes}
-          onChange={handleNotesChange}
-          onClick={(e) => e.stopPropagation()}
-          placeholder="Записывайте сюда важные моменты..."
-          rows="4"
-        />
-        <div className="notes-hint">
-          {localNotes ? `Заметка сохранена (${localNotes.length} симв.)` : 'Заметок пока нет'}
-        </div>
-      </div>
-    </div>
+      <CardActions>
+        <Chip label="Не начато" onClick={() => onStatusChange(technology.id, 'not-started')} />
+        <Chip label="В процессе" color="warning" onClick={() => onStatusChange(technology.id, 'in-progress')} />
+        <Chip label="Изучено" color="success" onClick={() => onStatusChange(technology.id, 'completed')} />
+        <IconButton color="error" onClick={() => onDelete(technology.id)}>
+          <DeleteIcon />
+        </IconButton>
+      </CardActions>
+    </Card>
   );
 }
 

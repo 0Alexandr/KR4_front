@@ -1,16 +1,21 @@
-import './Modal.css';
+// src/components/Modal.jsx
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from '@mui/material';
 
 function Modal({ isOpen, onClose, title, children }) {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
-        <h2>{title}</h2>
-        {children}
-        <button onClick={onClose} className="modal-close-btn">Закрыть</button>
-      </div>
-    </div>
+    <Dialog open={isOpen} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle>{title}</DialogTitle>
+      <DialogContent>
+        <Typography>{children}</Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} variant="contained">
+          Закрыть
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }
 

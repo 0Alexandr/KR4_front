@@ -1,91 +1,15 @@
 .App {
   min-height: 100vh;
-  background: #f5f7fa;
   padding: 20px 0;
+  background: #f5f7fa;
 }
 
 .container {
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 16px;
 }
 
-.technologies-list {
-  display: grid;
-  gap: 10px;
-}
-
-@media (min-width: 768px) {
-  .technologies-list {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-* {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.technology-with-notes {
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-}
-
-.search-box {
-  margin: 20px 0;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  flex-wrap: wrap;
-}
-
-.search-box input {
-  padding: 10px 14px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  font-size: 1em;
-  flex: 1;
-  min-width: 250px;
-}
-
-.search-box input:focus {
-  outline: none;
-  border-color: #1976d2;
-}
-
-.search-box span {
-  color: #555;
-  font-weight: 600;
-}
-
-/* Новые стили для страниц */
-.page {
-  padding: 20px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.page-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.back-link {
-  color: #1976d2;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.btn {
-  padding: 10px 20px;
-  background: #1976d2;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+.dark-bg {
+  background: #121212 !important;
 }

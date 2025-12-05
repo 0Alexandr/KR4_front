@@ -34,9 +34,6 @@ function DataExporter() {
   return (
     <div style={{ margin: '30px 0' }}>
       <h3>Экспорт данных</h3>
-      <p style={{ color: '#555', fontSize: '0.95em' }}>
-        Скачайте резервную копию всех технологий, статусов и заметок
-      </p>
 
       <button
         onClick={handleExport}

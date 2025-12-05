@@ -1,3 +1,4 @@
+import { Box, Typography, Paper } from '@mui/material';
 import ProgressBar from '../components/ProgressBar';
 
 function Statistics({ technologies, progress }) {
@@ -6,47 +7,29 @@ function Statistics({ technologies, progress }) {
   const inProgress = technologies.filter(t => t.status === 'in-progress').length;
   const notStarted = technologies.filter(t => t.status === 'not-started').length;
 
-  // Округляем точно так же, как в useTechnologies.js
-  const percentCompleted = total > 0 ? Math.round((completed / total) * 100) : 0;
-  const percentInProgress = total > 0 ? Math.round((inProgress / total) * 100) : 0;
-  const percentNotStarted = total > 0 ? Math.round((notStarted / total) * 100) : 0;
+  const percent = (count) => total > 0 ? Math.round((count / total) * 100) : 0;
 
   return (
-    <div className="page">
-      <h1>Статистика прогресса</h1>
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" gutterBottom>Статистика прогресса</Typography>
 
-      {/* Главный прогресс — как и везде */}
-      <ProgressBar progress={progress} label="Общий прогресс" color="#4caf50" />
+      <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3, mb: 4 }}>
+        <ProgressBar progress={progress} label="Общий прогресс" />
+      </Paper>
 
-      <div style={{ marginTop: '40px' }}>
-        <h2 style={{ color: '#333', marginBottom: '20px' }}>Распределение по статусам</h2>
+      <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 3 }}>
+        <Typography variant="h5" gutterBottom>Распределение по статусам</Typography>
+        <Box sx={{ mt: 3, spaceY: 3 }}>
+          <ProgressBar progress={percent(completed)} label={`Изучено (${completed})`} color="success" />
+          <ProgressBar progress={percent(inProgress)} label={`В процессе (${inProgress})`} color="warning" />
+          <ProgressBar progress={percent(notStarted)} label={`Не начато (${notStarted})`} color="error" />
+        </Box>
+      </Paper>
 
-        <ProgressBar
-          progress={percentCompleted}
-          label={`Изучено (${completed})`}
-          color="#26de81"
-        />
-        <ProgressBar
-          progress={percentInProgress}
-          label={`В процессе (${inProgress})`}
-          color="#f7b731"
-        />
-        <ProgressBar
-          progress={percentNotStarted}
-          label={`Не начато (${notStarted})`}
-          color="#ff6b6b"
-        />
-      </div>
-
-      <p style={{
-        marginTop: '30px',
-        fontSize: '1.2em',
-        color: '#555',
-        textAlign: 'center'
-      }}>
+      <Typography variant="h6" align="center" sx={{ mt: 4, color: 'text.secondary' }}>
         Всего технологий: <strong>{total}</strong>
-      </p>
-    </div>
+      </Typography>
+    </Box>
   );
 }
 
