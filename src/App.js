@@ -1,3 +1,4 @@
+// src/App.js
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import Home from './pages/Home';
@@ -7,12 +8,24 @@ import TechnologyDetail from './pages/TechnologyDetail';
 import Statistics from './pages/Statistics';
 import Settings from './pages/Settings';
 import useTechnologies from './hooks/useTechnologies';
+import SnackbarNotification from './components/SnackbarNotification';
+
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function App() {
-  const [mode, setMode] = useState('light'); // 'light' или 'dark'
+  // Сохраняем тему в localStorage
+  const [mode, setMode] = useState(() => {
+    const savedTheme = localStorage.getItem('themeMode');
+    return savedTheme || 'light'; // по умолчанию светлая
+  });
+
+  // При изменении темы — сохраняем в localStorage
+  useEffect(() => {
+    localStorage.setItem('themeMode', mode);
+  }, [mode]);
+
   const techHook = useTechnologies();
 
   const theme = createTheme({
@@ -24,7 +37,7 @@ function App() {
   });
 
   const toggleTheme = () => {
-    setMode((prev) => (prev === 'light' ? 'dark' : 'light'));
+    setMode(prev => (prev === 'light' ? 'dark' : 'light'));
   };
 
   return (
@@ -43,6 +56,14 @@ function App() {
               <Route path="/settings" element={<Settings {...techHook} />} />
               <Route path="*" element={<Home />} />
             </Routes>
+
+            {/* Уведомления */}
+            <SnackbarNotification
+              open={techHook.snackbar.open}
+              message={techHook.snackbar.message}
+              severity={techHook.snackbar.severity}
+              onClose={techHook.handleCloseSnackbar}
+            />
           </div>
         </div>
       </Router>

@@ -1,29 +1,64 @@
+// src/pages/TechnologyDetail.js
 import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { Box, Typography, Paper, Chip, Button } from '@mui/material';
+import { Box, Typography, Paper, Chip, Button, useTheme, Avatar, CircularProgress, Alert } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
 
 function TechnologyDetail({ technologies, updateStatus }) {
   const { techId } = useParams();
   const [item, setItem] = useState(null);
+  const [fullRecipe, setFullRecipe] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
   useEffect(() => {
     const found = technologies.find(t => t.id.toString() === techId);
     setItem(found);
+
+    // Если это рецепт и у него нет полного текста — подгружаем с API
+    if (found && found.id.toString().startsWith('recipe-') && !found.fullInstructions) {
+      const mealId = found.id.replace('recipe-', '');
+      fetchFullRecipe(mealId);
+    }
   }, [techId, technologies]);
+
+  const fetchFullRecipe = async (mealId) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealId}`);
+      const data = await res.json();
+      if (data.meals?.[0]) {
+        const full = data.meals[0].strInstructions;
+        setFullRecipe(full);
+
+        // Сохраняем полный рецепт в localStorage навсегда!
+        const updatedTech = technologies.map(t =>
+          t.id === item.id ? { ...t, fullInstructions: full } : t
+        );
+        localStorage.setItem('techTrackerData', JSON.stringify(updatedTech));
+      }
+    } catch (err) {
+      console.error('Ошибка загрузки полного рецепта:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!item) {
     return (
       <Box sx={{ p: 4, textAlign: 'center' }}>
-        <Typography variant="h5" color="error">Технология не найдена</Typography>
-        <Button component={Link} to="/technologies" startIcon={<ArrowBackIcon />} sx={{ mt: 2 }}>
-          Назад к списку
+        <Typography variant="h5" color="error">Не найдено</Typography>
+        <Button component={Link} to="/technologies" startIcon={<ArrowBackIcon />}>
+          Назад
         </Button>
       </Box>
     );
   }
 
   const isRecipe = item.id.toString().startsWith('recipe-');
+  const displayInstructions = item.fullInstructions || fullRecipe || item.description;
 
   return (
     <Box sx={{ p: 3 }}>
@@ -31,72 +66,69 @@ function TechnologyDetail({ technologies, updateStatus }) {
         Назад к списку
       </Button>
 
-      <Paper
-        elevation={6}
-        sx={{
-          p: 4,
-          borderRadius: 3,
-          bgcolor: 'grey.900',           // ТЁМНЫЙ ФОН
-          color: 'grey.100',             // СВЕТЛЫЙ ТЕКСТ
-          minHeight: '70vh',
-        }}
-      >
-        <Typography variant="h3" gutterBottom sx={{ color: 'primary.light' }}>
-          {item.title}
-        </Typography>
+      <Paper elevation={8} sx={{ p: { xs: 3, md: 6 }, borderRadius: 4, bgcolor: isDark ? 'grey.900' : 'background.paper' }}>
+        <Box display="flex" alignItems="center" gap={2} mb={4}>
+          {isRecipe && <RestaurantMenuIcon sx={{ fontSize: 48, color: 'primary.main' }} />}
+          <Typography variant="h3" sx={{ fontWeight: 700 }}>
+            {item.title}
+          </Typography>
+        </Box>
 
         {isRecipe && item.image && (
           <Box sx={{ textAlign: 'center', my: 4 }}>
-            <img
+            <Avatar
               src={item.image}
               alt={item.title}
-              style={{
-                maxWidth: '100%',
-                width: '600px',
-                borderRadius: '16px',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                border: '4px solid #333'
-              }}
+              variant="rounded"
+              sx={{ width: 380, height: 380, mx: 'auto', borderRadius: 4, boxShadow: 10 }}
             />
           </Box>
         )}
 
         {isRecipe && (item.category || item.area) && (
-          <Box sx={{ mb: 3 }}>
-            {item.category && <Chip label={`Категория: ${item.category}`} color="primary" sx={{ mr: 1 }} />}
-            {item.area && <Chip label={`Кухня: ${item.area}`} color="secondary" />}
+          <Box sx={{ mb: 4, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            {item.category && <Chip label={item.category} color="primary" />}
+            {item.area && <Chip label={item.area} color="secondary" />}
           </Box>
         )}
 
-        <Typography variant="h5" sx={{ mt: 5, mb: 2, color: 'grey.300' }}>
-          {isRecipe ? 'Полный рецепт' : 'Подробное описание'}
+        <Typography variant="h4" sx={{ mt: 5, mb: 3, color: 'primary.main' }}>
+          {isRecipe ? 'Полный рецепт' : 'Описание'}
         </Typography>
+
         <Paper
           sx={{
-            p: 3,
-            bgcolor: 'grey.800',
-            borderRadius: 2,
-            whiteSpace: 'pre-wrap',
-            fontSize: '1.1rem',
-            lineHeight: 1.7,
-            color: 'grey.200',
-            maxHeight: '500px',
+            p: 4,
+            bgcolor: isDark ? 'grey.800' : 'grey.50',
+            borderRadius: 3,
+            minHeight: 300,
+            maxHeight: '65vh',
             overflowY: 'auto',
-            border: '1px solid #444'
+            fontSize: '1.15rem',
+            lineHeight: 2,
+            whiteSpace: 'pre-wrap',
+            border: `1px solid ${isDark ? '#555' : '#ddd'}`,
           }}
         >
-          {item.description || 'Описание отсутствует.'}
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            displayInstructions || 'Рецепт недоступен'
+          )}
         </Paper>
 
-        <Typography variant="h5" sx={{ mt: 5, mb: 2, color: 'grey.300' }}>
+        {/* Статус */}
+        <Typography variant="h5" sx={{ mt: 5, mb: 3 }}>
           Статус {isRecipe ? 'приготовления' : 'изучения'}
         </Typography>
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 4 }}>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           {['not-started', 'in-progress', 'completed'].map(s => (
             <Button
               key={s}
               variant={item.status === s ? 'contained' : 'outlined'}
-              color={s === 'completed' ? 'success' : s === 'in-progress' ? 'warning' : 'inherit'}
+              color={s === 'completed' ? 'success' : s === 'in-progress' ? 'warning' : 'primary'}
               onClick={() => updateStatus(item.id, s)}
             >
               {s === 'not-started' && 'Не начато'}
@@ -106,24 +138,14 @@ function TechnologyDetail({ technologies, updateStatus }) {
           ))}
         </Box>
 
-        {item.notes && item.notes.trim() && (
-          <Box sx={{ mt: 5 }}>
-            <Typography variant="h5" sx={{ mb: 2, color: 'grey.300' }}>
-              Мои заметки
-            </Typography>
-            <Paper
-              sx={{
-                p: 3,
-                bgcolor: 'success.dark',
-                color: 'success.contrastText',
-                borderRadius: 2,
-                borderLeft: '6px solid',
-                borderColor: 'success.main',
-                whiteSpace: 'pre-wrap',
-                fontSize: '1.05rem'
-              }}
-            >
-              {item.notes}
+        {/* Заметки */}
+        {item.notes?.trim() && (
+          <Box sx={{ mt: 6 }}>
+            <Typography variant="h5" sx={{ mb: 3 }}>Мои заметки</Typography>
+            <Paper sx={{ p: 4, bgcolor: isDark ? 'grey.800' : 'grey.50', borderRadius: 3 }}>
+              <Typography sx={{ whiteSpace: 'pre-wrap', fontSize: '1.1rem' }}>
+                {item.notes}
+              </Typography>
             </Paper>
           </Box>
         )}

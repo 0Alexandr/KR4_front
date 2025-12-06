@@ -3,53 +3,62 @@ const loadRecipesFromApi = async () => {
   setApiError('');
 
   try {
-    const categories = ['Beef', 'Chicken', 'Dessert', 'Lamb', 'Pork', 'Seafood', 'Side', 'Starter', 'Vegetarian']; // 9 категорий
-    const recipes = [];
+    const current = JSON.parse(localStorage.getItem('techTrackerData') || '[]');
+    const existingIds = new Set(current.map(t => t.id));           // по ID
+    const existingTitles = new Set(current.map(t => t.title.toLowerCase())); // по названию (на всякий случай)
 
-    for (const category of categories) {
-      const res = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`);
+    const newRecipes = [];
+
+    // Пробуем загрузить до 10 уникальных рецептов
+    let attempts = 0;
+    while (newRecipes.length < 10 && attempts < 50) { // 50 попыток — защита от зацикливания
+      attempts++;
+      const res = await fetch('https://www.themealdb.com/api/json/v1/1/random.php');
       if (!res.ok) continue;
 
       const data = await res.json();
-      const meals = data.meals || [];
+      const recipe = data.meals?.[0];
+      if (!recipe) continue;
 
-      // Берём первый рецепт из категории
-      if (meals.length > 0) {
-        const mealId = meals[0].idMeal;
-        const detailRes = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealId}`);
-        if (detailRes.ok) {
-          const detailData = await detailRes.json();
-          const recipe = detailData.meals[0];
-          recipes.push({
-            id: `recipe-${recipe.idMeal}`,
-            title: recipe.strMeal,
-            description: recipe.strInstructions.substring(0, 200) + '...', // Короткое описание (первые 200 символов)
-            status: 'not-started',
-            notes: '',
-            image: recipe.strMealThumb // Для карточки, если нужно
-          });
-        }
-        // Задержка 500 мс между запросами
-        await new Promise(resolve => setTimeout(resolve, 500));
+      const recipeId = `recipe-${recipe.idMeal}`;
+      const titleLower = recipe.strMeal.toLowerCase();
+
+      // Проверяем: нет ли уже по ID или названию
+      if (!existingIds.has(recipeId) && !existingTitles.has(titleLower)) {
+        newRecipes.push({
+          id: recipeId,
+          title: recipe.strMeal,
+          description: recipe.strInstructions.substring(0, 250) + '...', // коротко для карточки
+          fullInstructions: recipe.strInstructions, // ← ПОЛНЫЙ РЕЦЕПТ!
+          status: 'not-started',
+          notes: '',
+          image: recipe.strMealThumb,
+          category: recipe.strCategory,
+          area: recipe.strArea
+        });
+
+        // Добавляем в наборы, чтобы не повторился в этой же сессии
+        existingIds.add(recipeId);
+        existingTitles.add(titleLower);
       }
+      await new Promise(r => setTimeout(r, 300));
     }
 
-    if (recipes.length === 0) throw new Error('Не удалось загрузить ни одного рецепта');
-
-    const current = JSON.parse(localStorage.getItem('techTrackerData') || '[]');
-    const existingTitles = new Set(current.map(t => t.title));
-    const uniqueNew = recipes.filter(r => !existingTitles.has(r.title));
-
-    if (uniqueNew.length === 0) {
-      setApiError('Все рецепты уже загружены!');
-    } else {
-      current.push(...uniqueNew);
-      localStorage.setItem('techTrackerData', JSON.stringify(current));
-      alert(`Успешно добавлено ${uniqueNew.length} новых рецептов!`);
-      window.location.reload();
+    if (newRecipes.length === 0) {
+      setApiError('Больше нет новых рецептов! Все доступные уже загружены');
+      setLoadingApi(false);
+      return;
     }
+
+    // Сохраняем
+    current.push(...newRecipes);
+    localStorage.setItem('techTrackerData', JSON.stringify(current));
+
+    alert(`Успешно добавлено ${newRecipes.length} новых рецептов!`);
+    window.location.reload();
+
   } catch (err) {
-    setApiError('Ошибка загрузки: ' + err.message);
+    setApiError('Ошибка: ' + err.message);
   } finally {
     setLoadingApi(false);
   }
