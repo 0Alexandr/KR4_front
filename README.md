@@ -13,5 +13,5 @@ npm install react-router-dom
 
 ### Интеграция Material-UI (MUI)
 
-npm install @mui/material @emotion/react @emotion/styled
+npm install @mui/material @emotion/react @emotion/styled  
 npm install @mui/icons-material  # Иконки
